@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: gateway-server
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
+      routes:
+        - id: main-service-api
+          uri: lb://main-service
+          predicates:
+            - Path=/api/**
+
+server:
+  port: 8080
+

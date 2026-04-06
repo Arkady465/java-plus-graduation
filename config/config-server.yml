@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations: "file:${user.dir}/config,file:./config,file:../config,file:${user.dir}/../../config"
+
+server:
+  port: 0
+
