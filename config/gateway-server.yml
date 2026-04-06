@@ -8,10 +8,10 @@ spring:
           enabled: true
           lowerCaseServiceId: true
       routes:
-        - id: main-service-api
+        - id: main-service
           uri: lb://main-service
           predicates:
-            - Path=/api/**
+            - Path=/admin/**,/users/**,/events/**,/categories/**,/compilations/**
 
 server:
   port: 8080
