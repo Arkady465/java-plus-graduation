@@ -1,22 +1,24 @@
 spring:
   application:
     name: main-service
+  profiles:
+    default: cloud
   config:
     import: "optional:configserver:"
   cloud:
     config:
       discovery:
-        enabled: false
+        enabled: true
         service-id: config-server
 
 eureka:
   client:
-    enabled: false
+    enabled: true
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
 
 server:
-  port: 8080
+  port: 0
 
 management:
   endpoints:
@@ -28,16 +30,16 @@ management:
 spring:
   config:
     activate:
-      on-profile: cloud
+      on-profile: local
   cloud:
     config:
       discovery:
-        enabled: true
+        enabled: false
 
 eureka:
   client:
-    enabled: true
+    enabled: false
 
 server:
-  port: 0
+  port: 8080
 
