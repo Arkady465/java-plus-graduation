@@ -253,17 +253,17 @@ public final class Dtos {
         List<ParticipationRequestDto> rejectedRequests;
     }
 
-    @Value
-    public static class PublicEventsQuery {
-        String text;
-        List<Long> categories;
-        Boolean paid;
-        String rangeStart;
-        String rangeEnd;
-        boolean onlyAvailable;
-        Sort sort;
-        int from;
-        int size;
+    public record PublicEventsQuery(
+            String text,
+            List<Long> categories,
+            Boolean paid,
+            String rangeStart,
+            String rangeEnd,
+            boolean onlyAvailable,
+            Sort sort,
+            int from,
+            int size
+    ) {
     }
 }
 
