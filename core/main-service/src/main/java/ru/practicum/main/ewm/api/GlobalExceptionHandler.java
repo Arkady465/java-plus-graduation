@@ -24,7 +24,8 @@ public class GlobalExceptionHandler {
             ConstraintViolationException.class,
             MissingServletRequestParameterException.class,
             MethodArgumentTypeMismatchException.class,
-            HttpMessageNotReadableException.class
+            HttpMessageNotReadableException.class,
+            IllegalArgumentException.class
     })
     public ResponseEntity<ApiError> badRequest(Exception ex) {
         return build(HttpStatus.BAD_REQUEST, "Incorrectly made request.", ex);
@@ -51,6 +52,7 @@ public class GlobalExceptionHandler {
                 .message(ex.getMessage())
                 .reason(reason)
                 .status(status.name())
+                .code(status.value())
                 .timestamp(LocalDateTime.now().format(TS))
                 .build();
         return ResponseEntity.status(status).body(body);
