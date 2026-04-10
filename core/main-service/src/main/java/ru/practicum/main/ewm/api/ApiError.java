@@ -12,6 +12,7 @@ public class ApiError {
     String message;
     String reason;
     String status;
+    int code;
     String timestamp;
 }
 

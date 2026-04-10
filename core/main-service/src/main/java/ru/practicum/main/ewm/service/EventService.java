@@ -109,7 +109,7 @@ public class EventService {
         CategoryEntity category = categoryService.requireCategory(dto.getCategory());
         LocalDateTime eventDate = dto.getEventDate();
         if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictException("For the requested operation the conditions are not met.",
+            throw new IllegalArgumentException(
                     "Field: eventDate. Error: должно содержать дату, которая еще не наступила. Value: "
                             + TS.format(eventDate));
         }
@@ -226,7 +226,7 @@ public class EventService {
         }
         if (eventDate != null) {
             if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-                throw new ConflictException("For the requested operation the conditions are not met.",
+                throw new IllegalArgumentException(
                         "Field: eventDate. Error: должно содержать дату, которая еще не наступила. Value: "
                                 + TS.format(eventDate));
             }
