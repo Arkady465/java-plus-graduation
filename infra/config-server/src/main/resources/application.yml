@@ -26,3 +26,17 @@ management:
     web:
       exposure:
         include: health,info
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+# Для локального/CI запуска — фиксированный порт и регистрация в Eureka включена
+server:
+  port: 8888
+
+eureka:
+  client:
+    enabled: true
