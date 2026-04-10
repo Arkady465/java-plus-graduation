@@ -41,7 +41,7 @@ public class UserService {
                 .sorted(Comparator.comparing(UserEntity::getId))
                 .skip(from)
                 .limit(size)
-                .map(this::toDto)
+                .map(UserService::toDto)
                 .toList();
     }
 
