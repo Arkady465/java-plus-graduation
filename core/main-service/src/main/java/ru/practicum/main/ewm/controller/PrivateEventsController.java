@@ -16,18 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.main.ewm.dto.Dtos.EventFullDto;
-import ru.practicum.main.ewm.dto.Dtos.EventShortDto;
-import ru.practicum.main.ewm.dto.Dtos.NewEventDto;
-import ru.practicum.main.ewm.dto.Dtos.UpdateEventUserRequest;
-import ru.practicum.main.ewm.service.EwmService;
+import ru.practicum.main.ewm.dto.event.EventFullDto;
+import ru.practicum.main.ewm.dto.event.EventShortDto;
+import ru.practicum.main.ewm.dto.event.NewEventDto;
+import ru.practicum.main.ewm.dto.event.UpdateEventUserRequest;
+import ru.practicum.main.ewm.service.EventService;
 
 @RestController
 @RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
 @Validated
 public class PrivateEventsController {
-    private final EwmService service;
+    private final EventService service;
 
     @GetMapping
     public List<EventShortDto> getUserEvents(

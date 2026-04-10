@@ -10,15 +10,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.main.ewm.dto.Dtos.CompilationDto;
-import ru.practicum.main.ewm.service.EwmService;
+import ru.practicum.main.ewm.dto.compilation.CompilationDto;
+import ru.practicum.main.ewm.service.CompilationService;
 
 @RestController
 @RequestMapping("/compilations")
 @RequiredArgsConstructor
 @Validated
 public class PublicCompilationsController {
-    private final EwmService service;
+    private final CompilationService service;
 
     @GetMapping
     public List<CompilationDto> getAll(

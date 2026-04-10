@@ -5,6 +5,19 @@ spring:
     default: cloud
   config:
     import: "optional:configserver:"
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ewm}
+    username: ${SPRING_DATASOURCE_USERNAME:ewm}
+    password: ${SPRING_DATASOURCE_PASSWORD:ewm}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
   cloud:
     config:
       discovery:

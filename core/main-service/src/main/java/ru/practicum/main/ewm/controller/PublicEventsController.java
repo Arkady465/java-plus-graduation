@@ -10,18 +10,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.main.ewm.dto.Dtos;
-import ru.practicum.main.ewm.dto.Dtos.EventFullDto;
-import ru.practicum.main.ewm.dto.Dtos.EventShortDto;
+import ru.practicum.main.ewm.dto.event.EventFullDto;
+import ru.practicum.main.ewm.dto.event.EventShortDto;
+import ru.practicum.main.ewm.dto.event.PublicEventsQuery;
 import ru.practicum.main.ewm.model.Enums.Sort;
-import ru.practicum.main.ewm.service.EwmService;
+import ru.practicum.main.ewm.service.EventService;
 
 @RestController
 @RequestMapping("/events")
 @RequiredArgsConstructor
 @Validated
 public class PublicEventsController {
-    private final EwmService service;
+    private final EventService service;
 
     @GetMapping
     public List<EventShortDto> getEvents(
@@ -35,7 +35,7 @@ public class PublicEventsController {
             @RequestParam(defaultValue = "0") @Min(0) int from,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return service.getPublicEvents(new Dtos.PublicEventsQuery(
+        return service.getPublicEvents(new PublicEventsQuery(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size
         ));
     }

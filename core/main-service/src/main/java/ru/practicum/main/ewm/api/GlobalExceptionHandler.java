@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -37,6 +38,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ApiError> conflict(ConflictException ex) {
         return build(HttpStatus.CONFLICT, ex.getReason(), ex);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> dataIntegrity(DataIntegrityViolationException ex) {
+        return build(HttpStatus.CONFLICT, "Integrity constraint has been violated.", ex);
     }
 
     private static ResponseEntity<ApiError> build(HttpStatus status, String reason, Exception ex) {

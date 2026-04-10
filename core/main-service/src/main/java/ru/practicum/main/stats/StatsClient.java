@@ -7,45 +7,71 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.MaxAttemptsRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class StatsClient {
     private static final DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final int CONNECT_TIMEOUT_MS = 2_000;
+    private static final int READ_TIMEOUT_MS = 5_000;
+
     private final DiscoveryClient discoveryClient;
-    private final RestClient restClient = RestClient.create();
+
+    private final RestClient restClient = RestClient.builder()
+            .requestFactory(createRequestFactory())
+            .build();
 
     private final String statsServiceId = "stats-server";
 
     private final RetryTemplate retryTemplate = createRetryTemplate();
 
+    private static SimpleClientHttpRequestFactory createRequestFactory() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        factory.setReadTimeout(READ_TIMEOUT_MS);
+        return factory;
+    }
+
     public void hit(String app, String uri, String ip) {
-        URI target = makeUri("/hit");
-        EndpointHit body = new EndpointHit(app, uri, ip, LocalDateTime.now().format(TS));
-        restClient.post()
-                .uri(target)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body)
-                .retrieve()
-                .toBodilessEntity();
+        try {
+            URI target = makeUri("/hit");
+            EndpointHit body = new EndpointHit(app, uri, ip, LocalDateTime.now().format(TS));
+            restClient.post()
+                    .uri(target)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception ex) {
+            log.debug("Stats hit skipped (stats unavailable): {}", ex.toString());
+        }
     }
 
     public List<ViewStats> getStats(String start, String end, List<String> uris, boolean unique) {
-        URI target = makeUri("/stats?start=" + encode(start) + "&end=" + encode(end) + "&unique=" + unique);
-        if (uris != null) {
-            for (String u : uris) {
-                target = URI.create(target.toString() + "&uris=" + encode(u));
+        try {
+            URI target = makeUri("/stats?start=" + encode(start) + "&end=" + encode(end) + "&unique=" + unique);
+            if (uris != null) {
+                for (String u : uris) {
+                    target = URI.create(target.toString() + "&uris=" + encode(u));
+                }
             }
+            List<ViewStats> body = restClient.get().uri(target).retrieve().body(Types.VIEW_STATS_LIST);
+            return body == null ? List.of() : body;
+        } catch (Exception ex) {
+            log.debug("Stats getStats fallback (stats unavailable): {}", ex.toString());
+            return List.of();
         }
-        return restClient.get().uri(target).retrieve().body(Types.VIEW_STATS_LIST);
     }
 
     private static String encode(String value) {
@@ -109,4 +135,3 @@ public class StatsClient {
                 };
     }
 }
-

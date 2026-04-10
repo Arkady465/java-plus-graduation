@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.main.ewm.dto.Dtos.CompilationDto;
-import ru.practicum.main.ewm.dto.Dtos.NewCompilationDto;
-import ru.practicum.main.ewm.dto.Dtos.UpdateCompilationRequest;
-import ru.practicum.main.ewm.service.EwmService;
+import ru.practicum.main.ewm.dto.compilation.CompilationDto;
+import ru.practicum.main.ewm.dto.compilation.NewCompilationDto;
+import ru.practicum.main.ewm.dto.compilation.UpdateCompilationRequest;
+import ru.practicum.main.ewm.service.CompilationService;
 
 @RestController
 @RequestMapping("/admin/compilations")
 @RequiredArgsConstructor
 public class AdminCompilationsController {
-    private final EwmService service;
+    private final CompilationService service;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

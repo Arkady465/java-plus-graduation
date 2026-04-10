@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.main.ewm.dto.Dtos.EventFullDto;
-import ru.practicum.main.ewm.dto.Dtos.UpdateEventAdminRequest;
-import ru.practicum.main.ewm.service.EwmService;
+import ru.practicum.main.ewm.dto.event.EventFullDto;
+import ru.practicum.main.ewm.dto.event.UpdateEventAdminRequest;
+import ru.practicum.main.ewm.service.EventService;
 
 @RestController
 @RequestMapping("/admin/events")
 @RequiredArgsConstructor
 @Validated
 public class AdminEventsController {
-    private final EwmService service;
+    private final EventService service;
 
     @GetMapping
     public List<EventFullDto> search(

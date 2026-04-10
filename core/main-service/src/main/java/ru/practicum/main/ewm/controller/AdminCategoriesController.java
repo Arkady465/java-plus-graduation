@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.main.ewm.dto.Dtos.CategoryDto;
-import ru.practicum.main.ewm.dto.Dtos.NewCategoryDto;
-import ru.practicum.main.ewm.service.EwmService;
+import ru.practicum.main.ewm.dto.category.CategoryDto;
+import ru.practicum.main.ewm.dto.category.NewCategoryDto;
+import ru.practicum.main.ewm.service.CategoryService;
 
 @RestController
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor
 public class AdminCategoriesController {
-    private final EwmService service;
+    private final CategoryService service;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

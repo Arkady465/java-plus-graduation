@@ -16,16 +16,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.main.ewm.dto.Dtos.NewUserRequest;
-import ru.practicum.main.ewm.dto.Dtos.UserDto;
-import ru.practicum.main.ewm.service.EwmService;
+import ru.practicum.main.ewm.dto.user.NewUserRequest;
+import ru.practicum.main.ewm.dto.user.UserDto;
+import ru.practicum.main.ewm.service.UserService;
 
 @RestController
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
 @Validated
 public class AdminUsersController {
-    private final EwmService service;
+    private final UserService service;
 
     @GetMapping
     public List<UserDto> getUsers(

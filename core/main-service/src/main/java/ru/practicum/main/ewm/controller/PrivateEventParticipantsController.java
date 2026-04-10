@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.main.ewm.dto.Dtos.EventRequestStatusUpdateRequest;
-import ru.practicum.main.ewm.dto.Dtos.EventRequestStatusUpdateResult;
-import ru.practicum.main.ewm.dto.Dtos.ParticipationRequestDto;
-import ru.practicum.main.ewm.service.EwmService;
+import ru.practicum.main.ewm.dto.request.EventRequestStatusUpdateRequest;
+import ru.practicum.main.ewm.dto.request.EventRequestStatusUpdateResult;
+import ru.practicum.main.ewm.dto.request.ParticipationRequestDto;
+import ru.practicum.main.ewm.service.RequestService;
 
 @RestController
 @RequestMapping("/users/{userId}/events/{eventId}/requests")
 @RequiredArgsConstructor
 public class PrivateEventParticipantsController {
-    private final EwmService service;
+    private final RequestService service;
 
     @GetMapping
     public List<ParticipationRequestDto> getParticipants(@PathVariable long userId, @PathVariable long eventId) {
