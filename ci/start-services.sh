@@ -10,6 +10,10 @@ HOST_IP=${HOST_IP:-127.0.0.1}
 EUREKA_PREF=${EUREKA_PREFER_IP_ADDRESS:-true}
 MVN="mvn"
 
+# Таймауты ожидания увеличены для CI
+WAIT_ITERATIONS=120
+WAIT_SLEEP=2
+
 run_and_log() {
   name=$1
   module=$2
@@ -24,13 +28,13 @@ run_and_log() {
 wait_for_health() {
   name=$1
   url=$2
-  for i in {1..60}; do
+  for i in $(seq 1 $WAIT_ITERATIONS); do
     if curl -sSf "$url" | grep -q '"status":"UP"'; then
       echo "$name is UP"
       return 0
     fi
-    echo "waiting for $name..."
-    sleep 2
+    echo "waiting for $name... ($i/$WAIT_ITERATIONS)"
+    sleep $WAIT_SLEEP
   done
   echo "Timed out waiting for $name"
   echo "--- Last logs for diagnosis ---"
@@ -43,6 +47,9 @@ declare -A pids
 # Start discovery-server
 run_and_log discovery infra/discovery-server "--server.port=8761 --spring.profiles.active=local"
 wait_for_health discovery http://localhost:8761/actuator/health
+
+# Give Eureka a short moment to fully initialize
+sleep 3
 
 # Start config-server (explicit local profile and port)
 run_and_log config infra/config-server "--server.port=8888 --spring.profiles.active=local"
