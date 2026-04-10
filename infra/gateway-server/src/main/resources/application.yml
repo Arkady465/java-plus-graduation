@@ -9,10 +9,15 @@ spring:
         enabled: true
         service-id: config-server
 
+# Настраиваемые через ENV: EUREKA_PREFER_IP_ADDRESS и HOST_IP
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP_ADDRESS:false}
+    ip-address: ${HOST_IP:}
+    hostname: ${HOSTNAME:localhost}
 
 server:
   port: 8080
@@ -22,4 +27,3 @@ management:
     web:
       exposure:
         include: health,info
-
