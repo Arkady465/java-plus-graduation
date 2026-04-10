@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
@@ -27,10 +28,8 @@ import ru.practicum.main.ewm.dto.event.UpdateEventAdminRequest;
 import ru.practicum.main.ewm.dto.event.UpdateEventUserRequest;
 import ru.practicum.main.ewm.model.Enums;
 import ru.practicum.main.ewm.model.Enums.EventState;
-import ru.practicum.main.ewm.model.Enums.RequestStatus;
 import ru.practicum.main.ewm.repository.EventRepository;
 import ru.practicum.main.ewm.repository.EventSpecifications;
-import ru.practicum.main.ewm.repository.ParticipationRequestRepository;
 import ru.practicum.main.ewm.service.mapper.EventDtoMapper;
 import ru.practicum.main.stats.StatsClient;
 
@@ -42,7 +41,6 @@ public class EventService {
     private static final DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final EventRepository eventRepository;
-    private final ParticipationRequestRepository participationRequestRepository;
     private final UserService userService;
     private final CategoryService categoryService;
     private final EventDtoMapper eventDtoMapper;
@@ -60,15 +58,22 @@ public class EventService {
                 .and(EventSpecifications.textMatches(q.text()));
 
         List<EventEntity> filtered = new ArrayList<>(eventRepository.findAll(spec));
+        List<Long> filteredIds = filtered.stream().map(EventEntity::getId).toList();
+        Map<Long, Long> confirmedByEvent = eventDtoMapper.loadConfirmedCounts(filteredIds);
         if (q.onlyAvailable()) {
             filtered = filtered.stream()
                     .filter(e -> e.getParticipantLimit() == 0
-                            || participationRequestRepository.countByEventIdAndStatus(e.getId(), RequestStatus.CONFIRMED)
-                            < e.getParticipantLimit())
+                            || confirmedByEvent.getOrDefault(e.getId(), 0L) < e.getParticipantLimit())
                     .toList();
+            filteredIds = filtered.stream().map(EventEntity::getId).toList();
         }
-
-        List<EventShortDto> out = filtered.stream().map(eventDtoMapper::toShortDto).toList();
+        Map<Long, Long> viewsByEvent = eventDtoMapper.loadViewCounts(filteredIds);
+        List<EventShortDto> out = filtered.stream()
+                .map(e -> eventDtoMapper.toShortDto(
+                        e,
+                        viewsByEvent.getOrDefault(e.getId(), 0L),
+                        confirmedByEvent.getOrDefault(e.getId(), 0L)))
+                .toList();
         if (q.sort() == Enums.Sort.EVENT_DATE) {
             out = out.stream().sorted(Comparator.comparing(EventShortDto::getEventDate)).toList();
         } else if (q.sort() == Enums.Sort.VIEWS) {
@@ -92,11 +97,11 @@ public class EventService {
     @Transactional(readOnly = true)
     public List<EventShortDto> getUserEvents(long userId, int from, int size) {
         userService.requireUser(userId);
-        return eventRepository.findByInitiatorIdOrderByIdAsc(userId).stream()
+        List<EventEntity> page = eventRepository.findByInitiatorIdOrderByIdAsc(userId).stream()
                 .skip(from)
                 .limit(size)
-                .map(eventDtoMapper::toShortDto)
                 .toList();
+        return eventDtoMapper.toShortDtoList(page);
     }
 
     public EventFullDto addUserEvent(long userId, NewEventDto dto) {
@@ -165,11 +170,11 @@ public class EventService {
             stateEnums = states.stream().map(EventState::valueOf).toList();
         }
         Specification<EventEntity> spec = EventSpecifications.adminFilter(users, stateEnums, categories, start, end);
-        return eventRepository.findAll(spec).stream()
+        List<EventEntity> page = eventRepository.findAll(spec).stream()
                 .skip(from)
                 .limit(size)
-                .map(eventDtoMapper::toFullDto)
                 .toList();
+        return eventDtoMapper.toFullDtoList(page);
     }
 
     public EventFullDto adminUpdateEvent(long eventId, UpdateEventAdminRequest req) {
@@ -202,11 +207,6 @@ public class EventService {
     public EventEntity requireEvent(long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
-    }
-
-    @Transactional(readOnly = true)
-    public EventShortDto toShortDto(EventEntity e) {
-        return eventDtoMapper.toShortDto(e);
     }
 
     private void applyEventUpdate(EventEntity e, String title, String annotation, String description, Long category,

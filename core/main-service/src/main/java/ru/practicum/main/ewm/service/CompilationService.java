@@ -4,13 +4,12 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.ewm.api.NotFoundException;
 import ru.practicum.main.ewm.domain.CompilationEntity;
+import ru.practicum.main.ewm.domain.EventEntity;
 import ru.practicum.main.ewm.dto.compilation.CompilationDto;
 import ru.practicum.main.ewm.dto.compilation.NewCompilationDto;
 import ru.practicum.main.ewm.dto.compilation.UpdateCompilationRequest;
@@ -86,10 +85,8 @@ public class CompilationService {
     }
 
     private CompilationDto toDto(CompilationEntity c) {
-        Set<EventShortDto> events = c.getEventIds().stream()
-                .map(eventService::requireEvent)
-                .map(eventDtoMapper::toShortDto)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        List<EventEntity> entities = c.getEventIds().stream().map(eventService::requireEvent).toList();
+        Set<EventShortDto> events = new LinkedHashSet<>(eventDtoMapper.toShortDtoList(entities));
         return CompilationDto.builder()
                 .id(c.getId())
                 .title(c.getTitle())

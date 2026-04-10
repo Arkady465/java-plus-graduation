@@ -104,11 +104,11 @@ public class StatsClient {
         RetryTemplate retryTemplate = new RetryTemplate();
 
         FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
-        fixedBackOffPolicy.setBackOffPeriod(3000L);
+        fixedBackOffPolicy.setBackOffPeriod(0L);
         retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
 
         MaxAttemptsRetryPolicy retryPolicy = new MaxAttemptsRetryPolicy();
-        retryPolicy.setMaxAttempts(3);
+        retryPolicy.setMaxAttempts(1);
         retryTemplate.setRetryPolicy(retryPolicy);
 
         return retryTemplate;

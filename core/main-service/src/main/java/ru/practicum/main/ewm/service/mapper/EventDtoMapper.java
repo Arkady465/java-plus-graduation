@@ -2,7 +2,10 @@ package ru.practicum.main.ewm.service.mapper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -47,8 +50,87 @@ public class EventDtoMapper {
 
     @Transactional(readOnly = true)
     public EventFullDto toFullDto(EventEntity e) {
-        long confirmed = participationRequestRepository.countByEventIdAndStatus(e.getId(), RequestStatus.CONFIRMED);
-        long views = getViews(e.getId());
+        long id = e.getId();
+        Map<Long, Long> confirmed = loadConfirmedCounts(List.of(id));
+        Map<Long, Long> views = loadViewCounts(List.of(id));
+        return toFullDto(e, views.getOrDefault(id, 0L), confirmed.getOrDefault(id, 0L));
+    }
+
+    @Transactional(readOnly = true)
+    public EventShortDto toShortDto(EventEntity e) {
+        long id = e.getId();
+        Map<Long, Long> confirmed = loadConfirmedCounts(List.of(id));
+        Map<Long, Long> views = loadViewCounts(List.of(id));
+        return toShortDto(e, views.getOrDefault(id, 0L), confirmed.getOrDefault(id, 0L));
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventShortDto> toShortDtoList(List<EventEntity> events) {
+        if (events.isEmpty()) {
+            return List.of();
+        }
+        List<Long> ids = events.stream().map(EventEntity::getId).toList();
+        Map<Long, Long> confirmed = loadConfirmedCounts(ids);
+        Map<Long, Long> views = loadViewCounts(ids);
+        return events.stream()
+                .map(e -> toShortDto(e, views.getOrDefault(e.getId(), 0L), confirmed.getOrDefault(e.getId(), 0L)))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventFullDto> toFullDtoList(List<EventEntity> events) {
+        if (events.isEmpty()) {
+            return List.of();
+        }
+        List<Long> ids = events.stream().map(EventEntity::getId).toList();
+        Map<Long, Long> confirmed = loadConfirmedCounts(ids);
+        Map<Long, Long> views = loadViewCounts(ids);
+        return events.stream()
+                .map(e -> toFullDto(e, views.getOrDefault(e.getId(), 0L), confirmed.getOrDefault(e.getId(), 0L)))
+                .toList();
+    }
+
+    public Map<Long, Long> loadConfirmedCounts(Collection<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Object[]> rows = participationRequestRepository.countByEventIdInAndStatusGrouped(
+                eventIds, RequestStatus.CONFIRMED);
+        Map<Long, Long> map = HashMap.newHashMap(rows.size());
+        for (Object[] row : rows) {
+            map.put((Long) row[0], ((Number) row[1]).longValue());
+        }
+        return map;
+    }
+
+    public Map<Long, Long> loadViewCounts(Collection<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return Map.of();
+        }
+        List<String> uris = eventIds.stream().map(id -> "/events/" + id).toList();
+        String start = LocalDateTime.of(2000, 1, 1, 0, 0).format(TS);
+        String end = LocalDateTime.of(3000, 1, 1, 0, 0).format(TS);
+        List<StatsClient.ViewStats> stats = statsClient.getStats(start, end, uris, true);
+        if (stats == null || stats.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, Long> map = HashMap.newHashMap(stats.size());
+        for (StatsClient.ViewStats s : stats) {
+            String uri = s.getUri();
+            if (uri == null || !uri.startsWith("/events/")) {
+                continue;
+            }
+            try {
+                long id = Long.parseLong(uri.substring("/events/".length()));
+                map.put(id, s.getHits());
+            } catch (NumberFormatException ignore) {
+                // skip malformed uri
+            }
+        }
+        return map;
+    }
+
+    public EventFullDto toFullDto(EventEntity e, long views, long confirmed) {
         return EventFullDto.builder()
                 .id(e.getId())
                 .title(e.getTitle())
@@ -69,10 +151,7 @@ public class EventDtoMapper {
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public EventShortDto toShortDto(EventEntity e) {
-        long confirmed = participationRequestRepository.countByEventIdAndStatus(e.getId(), RequestStatus.CONFIRMED);
-        long views = getViews(e.getId());
+    public EventShortDto toShortDto(EventEntity e, long views, long confirmed) {
         return EventShortDto.builder()
                 .id(e.getId())
                 .title(e.getTitle())
@@ -84,24 +163,5 @@ public class EventDtoMapper {
                 .views(views)
                 .confirmedRequests(confirmed)
                 .build();
-    }
-
-    private long getViews(long eventId) {
-        String uri = "/events/" + eventId;
-        try {
-            String start = LocalDateTime.of(2000, 1, 1, 0, 0).format(TS);
-            String end = LocalDateTime.of(3000, 1, 1, 0, 0).format(TS);
-            List<StatsClient.ViewStats> stats = statsClient.getStats(start, end, List.of(uri), true);
-            if (stats == null || stats.isEmpty()) {
-                return 0;
-            }
-            return stats.stream()
-                    .filter(s -> uri.equals(s.getUri()))
-                    .mapToLong(StatsClient.ViewStats::getHits)
-                    .findFirst()
-                    .orElse(0);
-        } catch (Exception ex) {
-            return 0;
-        }
     }
 }
