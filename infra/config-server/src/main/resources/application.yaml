@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations:
+            - classpath:config/{label}/{application}
+
+server:
+  port: 0
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+  instance:
+    preferIpAddress: true
+    hostname: ${spring.application.name:localhost}
+    instance-id: "${spring.application.name}:${random.value}"
+#    leaseRenewalIntervalInSeconds: 10
+
+logging:
+  level:
+    root: INFO
+    ru.practicum.infra.config: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
