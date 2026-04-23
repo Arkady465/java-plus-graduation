@@ -199,6 +199,7 @@
 	<modules>
 		<module>infra</module>
 		<module>core</module>
+		<module>discovery-server</module>
 	</modules>
 
 </project>
