@@ -1,0 +1,88 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+          url-expression: "'http://' + serviceId + ':' + port"
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 10s
+      routes:
+        - id: request_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/users/{userId}/requests/**
+
+        - id: private_event_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/users/{userId}/events/**
+
+        - id: private_comment_service_route
+          uri: lb://main-service
+          predicates:
+            - Method=POST,PATCH,DELETE
+            - Path=/events/{eventId}/comments/**
+
+        - id: admin_comment_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/events/{eventId}/comments/**
+
+        - id: admin_event_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/events/**
+
+        - id: admin_user_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/users/**
+
+        - id: admin_category_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/categories/**
+
+        - id: admin_compilation_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/admin/compilations/**
+
+        - id: public_comment_service_route
+          uri: lb://main-service
+          predicates:
+            - Method=GET
+            - Path=/events/{eventId}/comments/**
+
+        - id: public_event_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/events/**
+
+        - id: public_category_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/categories/**
+
+        - id: public_compilation_service_route
+          uri: lb://main-service
+          predicates:
+            - Path=/compilations/**
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+#    org.springframework.cloud.gateway: DEBUG
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    com.netflix.discovery: DEBUG
+    com.netflix.eureka: DEBUG
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: DEBUG
+    org.springframework.cloud.gateway.discovery.DiscoveryClientRouteDefinitionLocator: DEBUG
+    ru.practicum.infra.gateway: DEBUG
