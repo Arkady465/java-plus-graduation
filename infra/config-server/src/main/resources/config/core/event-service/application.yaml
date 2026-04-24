@@ -1,0 +1,37 @@
+server:
+  port: 0
+
+spring:
+  datasource:
+    driverClassName: 'org.postgresql.Driver'
+    url: 'jdbc:postgresql://localhost:5433/events_db'
+    username: 'ewmuser'
+    password: 'ewmpass'
+  jpa:
+    show_sql: true
+    hibernate.ddl-auto: none
+    properties.hibernate:
+      jdbc.time_zone: UTC
+      format_sql: true
+  sql.init.mode: always
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+# Stats-server custom properties
+stats-server:
+  id: 'stats-server'
+  retryBackOffPeriod: 10000
+  retryMaxAttempts: 5
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      failureRateThreshold: 50
+
+logging:
+  level:
+    root: INFO
+    ru.practicum.core.event: DEBUG
