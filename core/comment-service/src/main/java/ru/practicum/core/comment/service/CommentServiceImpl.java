@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import ru.practicum.core.comment.dto.CommentDto;
 import ru.practicum.core.comment.dto.CommentParam;
@@ -21,20 +22,21 @@ import ru.practicum.core.comment.mapper.CommentMapper;
 import ru.practicum.core.comment.model.Comment;
 import ru.practicum.core.comment.repository.CommentRepository;
 
-import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     private final UserClient userClient;
     private final EventClient eventClient;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     public CommentDto create(CommentParam commentParam) {
@@ -44,15 +46,18 @@ public class CommentServiceImpl implements CommentService {
         UserDto commentator = userClient.getById(commentParam.getUserId());
         EventFullDto eventFullDto = eventClient.getEventInner(commentParam.getEventId());
 
-        Comment comment = CommentMapper.toNewComment(commentator, eventFullDto, commentParam.getCommentDto());
-        comment.setCreatedOn(LocalDateTime.now());
-        comment = commentRepository.save(comment);
+        CommentDto result = transactionTemplate.execute(status -> {
+            Comment comment = CommentMapper.toNewComment(commentator, eventFullDto, commentParam.getCommentDto());
+            comment = commentRepository.save(comment);
 
-        log.info("New comment added: {}", comment);
-        return CommentMapper.toCommentDto(comment);
+            log.info("New comment added: {}", comment);
+            return CommentMapper.toCommentDto(comment);
+        });
+        return Objects.requireNonNull(result, "TransactionTemplate returned null result");
     }
 
     @Override
+    @Transactional
     public CommentDto update(CommentParam commentParam) {
         log.debug("CommentId = {} update request for eventId = {} by userId = {}: {}",
                 commentParam.getCommentId(), commentParam.getEventId(), commentParam.getUserId(),
@@ -83,6 +88,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public void deleteByUser(CommentParam commentParam) {
         log.debug("CommentId = {} delete request for eventId = {} by userId = {}",
                 commentParam.getCommentId(), commentParam.getEventId(), commentParam.getUserId());
@@ -107,6 +113,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public void deleteByAdmin(Long eventId, Long commentId) {
         log.debug("Comment id = {} delete request for eventId = {} by admin", commentId, eventId);
 
@@ -124,7 +131,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<CommentDto> findAllByEventId(CommentParam commentParam) {
         log.debug("Comments request for eventId = {}", commentParam.getEventId());
 
@@ -145,6 +151,10 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     public Map<Long, Long> countByEvents(List<Long> eventIds) {
         log.debug("Comments count for events: {}", eventIds);
+
+        if (eventIds == null || eventIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
         return commentRepository.countByEventIdIn(eventIds).stream()
                 .collect(Collectors.toMap(
