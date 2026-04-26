@@ -1,0 +1,45 @@
+server:
+  port: 0
+
+grpc:
+  server:
+    port: 0
+
+spring:
+  datasource:
+    driverClassName: 'org.h2.Driver'
+    url: 'jdbc:h2:mem:analyzer_db'
+    username: 'ewmuser'
+    password: 'ewmpass'
+  jpa:
+    show_sql: true
+    hibernate.ddl-auto: none
+    properties.hibernate:
+      dialect: 'org.hibernate.dialect.H2Dialect'
+      jdbc.time_zone: UTC
+      format_sql: true
+  sql.init.mode: always
+
+logging:
+  level:
+    root: INFO
+    ru.practicum.stats.analyzer: DEBUG
+
+kafka:
+  server: 'localhost:9092'
+  topics:
+    users: 'stats.user-actions.v1'
+    events: 'stats.events-similarity.v1'
+  user-consumer:
+    client-id: 'user-consumer'
+    group-id: 'analyzer.group'
+    poll-duration-ms: 5000
+  event-consumer:
+    client-id: 'event-consumer'
+    group-id: 'analyzer.group'
+    poll-duration-ms: 5000
+
+action-weights:
+  view: 0.4
+  register: 0.8
+  like: 1

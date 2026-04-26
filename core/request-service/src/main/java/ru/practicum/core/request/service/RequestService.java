@@ -21,6 +21,4 @@ public interface RequestService {
                                                        EventRequestStatusUpdateRequest request);
 
     Map<Long, Long> countConfirmedRequestsForEvents(List<Long> eventIds);
-
-    List<ParticipationRequestDto> getByEventAndRequester(Long eventId, Long requesterId);
 }

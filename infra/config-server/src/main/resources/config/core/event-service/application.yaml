@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     driverClassName: 'org.postgresql.Driver'
-    url: 'jdbc:postgresql://postgres:5432/events_db'
+    url: 'jdbc:postgresql://localhost:5433/events_db'
     username: 'ewmuser'
     password: 'ewmpass'
   jpa:
@@ -19,11 +19,20 @@ spring:
       circuitbreaker:
         enabled: true
 
-# Stats-server custom properties
-stats-server:
-  id: 'stats-server'
-  retryBackOffPeriod: 10000
-  retryMaxAttempts: 5
+grpc:
+  client:
+    analyzer:
+      address: 'discovery:///analyzer'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+      lazy: true
+    collector:
+      address: 'discovery:///collector'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+      lazy: true
 
 resilience4j.circuitbreaker:
   configs:
@@ -35,3 +44,4 @@ logging:
   level:
     root: INFO
     ru.practicum.core.event: DEBUG
+    ru.practicum.stats.client: DEBUG

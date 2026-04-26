@@ -1,10 +1,11 @@
 package ru.practicum.core.request.model;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import ru.practicum.core.common.dto.request.RequestStatus;
 
 import java.time.LocalDateTime;
 
