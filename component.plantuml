@@ -1,0 +1,23 @@
+@startuml
+
+package "infra" {
+    [discovery-server] as discovery
+    [config-server] as config
+    [gateway-server] as gateway
+}
+
+package "stats" {
+    [stats-server]
+    [stats-client]
+    [stats-dto]
+}
+
+package "core" {
+    [user-service] as user
+    [event-service] as event
+    [request-service] as request
+    [comment-service] as comment
+    [common] as common
+}
+
+@enduml

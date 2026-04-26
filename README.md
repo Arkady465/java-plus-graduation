@@ -1,3 +1,57 @@
+# Описание основной функциональности
+
+![component-diagram-very-simplified](component-simplified.png)
+
+## Внутреннее взаимодействие между сервисами
+* В модуле <code>core</code> все бизнес-сервисы используют подмодуль <code>common</code>, в который вынесены общие 
+классы - dto, исключения, Feign-клиенты, их декодеры, конфиги и фоллбэки
+* Подмодуль <code>event-service</code> использует внутренний API подмодулей <code>user-service</code>, <code>request-service</code>, 
+<code>comment-service</code>, а также использует <code>stats-client</code> из модуля <code>stats</code>
+* Подмодуль <code>request-service</code> использует внутренний API подмодулей <code>user-service</code> и 
+  <code>event-service</code>
+* Подмодуль <code>comment-service</code> использует внутренний API подмодулей <code>user-service</code> и
+  <code>event-service</code>
+
+## Внутренний API
+
+### user-service
+
+#### <code>GET admin/users/{userId}</code>
+Получение <code>UserDto</code> с указанным <code>id</code>
+
+#### <code>GET admin/users/short/{userId}</code>
+Получение <code>UserShortDto</code> с указанным <code>id</code>
+
+#### <code>GET admin/users/short?ids=...</code>
+Получение списка <code>UserShortDto</code> с <code>id</code> из перечня
+
+### event-service
+
+#### <code>GET /events/inner/{eventId}</code>
+Получение <code>EventFullDto</code> с указанным <code>id</code>
+
+*Внешний <code>GET</code>-метод получения события возвращает только 
+опубликованные события (<code>EventState.PUBLISHED</code>)*
+
+### request-service
+
+#### <code>GET /requests/countConfirmed?eventIds=...</code>
+Получение мапы с количеством подтвержденных заявок на участие для событий с <code>id</code> из перечня
+
+### comment-service
+
+#### <code>GET /admin/comments/count?eventIds=...</code>
+Получение мапы с количеством комментариев для событий с <code>id</code> из перечня
+
+#### <code>GET /admin/events/{eventId}/comments/count.</code>
+Получение количества комментариев для события с указанным <code>id</code>
+
+## Внешний API
+
+[Главный сервис](ewm-main-service-spec.json)
+
+[Сервис статистики](ewm-stats-service-spec.json)
+
 # Фича - комментарии к событиям
 
 ## Private
@@ -38,7 +92,8 @@
 #### Ответы
 
 * <code>200</code> Комментарий успешно изменён, возвращается <code>CommentDto</code> со всеми полями (<code>editedOn != null</code>).
-* <code>400</code> Запрос составлен некорректно: не указан заголовок, отсутствует текст комментария, длина комментария не соответствует требованиям, комментарий не связан с указанным событием.
+* <code>400</code> Запрос составлен некорректно: не указан заголовок, отсутствует текст комментария, 
+длина комментария не соответствует требованиям, комментарий не связан с указанным событием.
 * <code>403</code> Нет доступа на редактирование комментария (<code>X-Ewm-User-Id != userId</code>).
 * <code>404</code> Комментарий не найден.
 

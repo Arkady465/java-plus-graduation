@@ -5,7 +5,6 @@ eureka:
   instance:
     preferIpAddress: true
     hostname: ${spring.application.name:localhost}
-#    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
     instance-id: "${spring.application.name}:${server.port}"
 
 spring:

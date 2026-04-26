@@ -11,64 +11,79 @@ spring:
         response-timeout: 10s
       routes:
         - id: request_service_route
-          uri: lb://main-service
+          uri: lb://request-service
           predicates:
-            - Path=/users/{userId}/requests/**
+            - Path=/users/{userId}/requests/**,/users/{userId}/events/{eventId}/requests
+
+        - id: inner_request_service_route
+          uri: lb://request-service
+          predicates:
+            - Path=/requests/countConfirmed/**
 
         - id: private_event_service_route
-          uri: lb://main-service
+          uri: lb://event-service
           predicates:
             - Path=/users/{userId}/events/**
 
         - id: private_comment_service_route
-          uri: lb://main-service
+          uri: lb://comment-service
           predicates:
             - Method=POST,PATCH,DELETE
             - Path=/events/{eventId}/comments/**
 
         - id: admin_comment_service_route
-          uri: lb://main-service
+          uri: lb://comment-service
           predicates:
             - Path=/admin/events/{eventId}/comments/**
 
+        - id: inner_comment_service_route
+          uri: lb://comment-service
+          predicates:
+            - Path=/admin/comments/count
+
         - id: admin_event_service_route
-          uri: lb://main-service
+          uri: lb://event-service
           predicates:
             - Path=/admin/events/**
 
         - id: admin_user_service_route
-          uri: lb://main-service
+          uri: lb://user-service
           predicates:
             - Path=/admin/users/**
 
         - id: admin_category_service_route
-          uri: lb://main-service
+          uri: lb://event-service
           predicates:
             - Path=/admin/categories/**
 
         - id: admin_compilation_service_route
-          uri: lb://main-service
+          uri: lb://event-service
           predicates:
             - Path=/admin/compilations/**
 
         - id: public_comment_service_route
-          uri: lb://main-service
+          uri: lb://comment-service
           predicates:
             - Method=GET
             - Path=/events/{eventId}/comments/**
 
         - id: public_event_service_route
-          uri: lb://main-service
+          uri: lb://event-service
           predicates:
             - Path=/events/**
 
+        - id: inner_event_service_route
+          uri: lb://event-service
+          predicates:
+            - Path=/inner/{eventId}/**
+
         - id: public_category_service_route
-          uri: lb://main-service
+          uri: lb://event-service
           predicates:
             - Path=/categories/**
 
         - id: public_compilation_service_route
-          uri: lb://main-service
+          uri: lb://event-service
           predicates:
             - Path=/compilations/**
 
@@ -78,7 +93,6 @@ server:
 logging:
   level:
     root: INFO
-#    org.springframework.cloud.gateway: DEBUG
     org.springframework.http.server.reactive: DEBUG
     org.springframework.web.reactive: DEBUG
     com.netflix.discovery: DEBUG
