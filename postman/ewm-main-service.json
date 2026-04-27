@@ -14361,7 +14361,7 @@
 					"                    method: method,",
 					"                    body: body == null ? \"\" : JSON.stringify(body),",
 					"                    header: [{",
-					"                        \"key\": \"X-Sharer-User-Id\",",
+					"                        \"key\": \"X-EWM-USER-ID\",",
 					"                        \"value\": id,",
 					"                        \"type\": \"text\",",
 					"                    },",

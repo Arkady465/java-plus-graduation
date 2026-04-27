@@ -20,6 +20,10 @@ import ru.practicum.stats.collector.service.Collector;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @GrpcService
@@ -44,9 +48,30 @@ public class UserActionRpcController extends UserActionControllerGrpc.UserAction
             SpecificRecordBase specificRecordBase = toAvro(request);
 
             log.debug("Sending user action message: {}", specificRecordBase);
-            collector.send(kafkaConfig.getTopics().getUsers(), request.getEventId(), specificRecordBase);
+            Future<?> sendFuture = collector.send(kafkaConfig.getTopics().getUsers(), request.getEventId(), specificRecordBase);
+            // Ждём подтверждение от Kafka, чтобы вызывающий сервис не считал действие доставленным "вслепую".
+            sendFuture.get(3, TimeUnit.SECONDS);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
+        } catch (TimeoutException exception) {
+            log.error("Kafka send timed out", exception);
+            responseObserver.onError(Status.DEADLINE_EXCEEDED
+                    .withDescription("Kafka send timed out")
+                    .withCause(exception)
+                    .asRuntimeException());
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            log.error("Kafka send interrupted", exception);
+            responseObserver.onError(Status.CANCELLED
+                    .withDescription("Kafka send interrupted")
+                    .withCause(exception)
+                    .asRuntimeException());
+        } catch (ExecutionException exception) {
+            log.error("Kafka send failed", exception);
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription("Kafka send failed: " + exception.getCause())
+                    .withCause(exception)
+                    .asRuntimeException());
         } catch (Exception exception) {
             log.error(exception.getMessage());
 
@@ -54,11 +79,10 @@ public class UserActionRpcController extends UserActionControllerGrpc.UserAction
             PrintWriter printWriter = new PrintWriter(stringWriter);
 
             exception.printStackTrace(printWriter);
-            responseObserver.onError(new StatusRuntimeException(
-                    Status.INTERNAL
-                            .withDescription(exception.getLocalizedMessage())
-                            .withCause(exception)
-            ));
+            responseObserver.onError(Status.INTERNAL
+                    .withDescription(exception.getLocalizedMessage())
+                    .withCause(exception)
+                    .asRuntimeException());
         }
     }
 

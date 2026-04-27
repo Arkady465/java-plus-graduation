@@ -10,8 +10,6 @@ import ru.practicum.ewm.stats.grpc.user.UserActionControllerGrpc;
 import ru.practicum.ewm.stats.proto.user.ActionTypeProto;
 import ru.practicum.ewm.stats.proto.user.UserActionProto;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.Instant;
 
 @Slf4j
@@ -36,13 +34,8 @@ public class CollectorClient {
             client.collectUserAction(request);
             log.debug("Successfully sent user action");
         } catch (StatusRuntimeException exception) {
-            log.debug("Rpc-method call failure");
-            log.error(exception.getMessage());
-
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter printWriter = new PrintWriter(stringWriter);
-
-            exception.printStackTrace(printWriter);
+            log.warn("Failed to send user action to Collector via gRPC: {}", exception.getStatus(), exception);
+            throw new StatsCollectorUnavailableException("Failed to send user action to Collector", exception);
         }
     }
 }

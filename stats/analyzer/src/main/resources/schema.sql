@@ -17,8 +17,7 @@ CREATE TABLE IF NOT EXISTS event_similarity (
     score DOUBLE PRECISION NOT NULL,
     timestamp TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 
-    CONSTRAINT event_similarity_pk PRIMARY KEY (eventA, eventB),
-    CONSTRAINT unique_event_pair UNIQUE (eventA, eventB)
+    CONSTRAINT event_similarity_pk PRIMARY KEY (eventA, eventB)
 );
 
 CREATE INDEX IF NOT EXISTS idx_event_action ON user_actions(event_id);

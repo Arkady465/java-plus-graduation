@@ -28,6 +28,11 @@ public class Collector {
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, serverUrl);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GeneralAvroSerializer.class);
+        // Надёжнее для критичных событий: подтверждение всех реплик и идемпотентность.
+        config.put(ProducerConfig.ACKS_CONFIG, "all");
+        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        config.put(ProducerConfig.RETRIES_CONFIG, 5);
+        config.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
 
         producer = new KafkaProducer<>(config);
         log.info("Collector is using Kafka-server at url: {}", serverUrl);
