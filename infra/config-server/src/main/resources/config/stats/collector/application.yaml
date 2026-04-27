@@ -1,0 +1,17 @@
+server:
+  port: 0
+
+grpc:
+  server:
+    port: 0
+
+logging:
+  level:
+    root: INFO
+    ru.practicum.stats.collector: DEBUG
+
+# Kafka custom properties
+kafka:
+  server: 'localhost:9092'
+  topics:
+    users: 'stats.user-actions.v1'

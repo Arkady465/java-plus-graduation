@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import ru.practicum.core.request.model.Request;
-import ru.practicum.core.request.model.RequestStatus;
+import ru.practicum.core.common.dto.request.RequestStatus;
 
 import java.util.List;
 import java.util.Optional;

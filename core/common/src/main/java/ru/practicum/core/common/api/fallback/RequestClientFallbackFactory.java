@@ -5,6 +5,8 @@ import org.springframework.cloud.openfeign.FallbackFactory;
 import org.springframework.stereotype.Component;
 
 import ru.practicum.core.common.api.client.RequestClient;
+import ru.practicum.core.common.dto.request.ParticipationRequestDto;
+import ru.practicum.core.common.exception.ServiceUnavailableException;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,13 @@ public class RequestClientFallbackFactory implements FallbackFactory<RequestClie
 
                 return eventIds.stream()
                         .collect(Collectors.toMap(Function.identity(), id -> 0L));
+            }
+
+            @Override
+            public List<ParticipationRequestDto> getUserRequests(Long userId) {
+                log.warn("request-service is not available, returning fallback response");
+
+                throw new ServiceUnavailableException("event-service is not available");
             }
         };
     }

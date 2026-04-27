@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     driverClassName: 'org.postgresql.Driver'
-    url: 'jdbc:postgresql://postgres:5432/requests_db'
+    url: 'jdbc:postgresql://localhost:5433/requests_db'
     username: 'ewmuser'
     password: 'ewmpass'
   jpa:
@@ -18,6 +18,15 @@ spring:
     openfeign:
       circuitbreaker:
         enabled: true
+
+grpc:
+  client:
+    collector:
+      address: 'discovery:///collector'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+      lazy: true
 
 feign:
   client:
@@ -41,3 +50,4 @@ logging:
   level:
     root: INFO
     ru.practicum.core.request: DEBUG
+    ru.practicum.stats.client: DEBUG
