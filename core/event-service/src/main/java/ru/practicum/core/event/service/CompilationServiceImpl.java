@@ -157,10 +157,10 @@ public class CompilationServiceImpl implements CompilationService {
         return events.stream()
                 .map(event -> {
                     Long confirmedRequests = confirmedRequestsMap.getOrDefault(event.getId(), 0L);
-                    Long views = 0L;
+                    Double rating = 0.0;
                     Long comments = commentsMap.getOrDefault(event.getId(), 0L);
                     UserShortDto initiator = eventInitiatorsMap.get(event.getInitiator());
-                    return eventMapper.toShortDto(event, confirmedRequests, views, comments, initiator);
+                    return eventMapper.toShortDto(event, confirmedRequests, rating, comments, initiator);
                 })
                 .collect(Collectors.toSet());
     }

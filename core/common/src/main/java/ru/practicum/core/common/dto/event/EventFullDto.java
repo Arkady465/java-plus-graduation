@@ -51,7 +51,8 @@ public class EventFullDto {
     @NotBlank
     private String title;
 
-    private Long views; // дорасчёт, в базе не хранится
+    //private Long views; // дорасчёт, в базе не хранится
+    private Double rating;
 
     private Long comments;
 }

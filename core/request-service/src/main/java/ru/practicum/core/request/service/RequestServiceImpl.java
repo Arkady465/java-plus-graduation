@@ -19,8 +19,10 @@ import ru.practicum.core.common.exception.ValidationException;
 import ru.practicum.core.request.mapper.RequestMapper;
 import ru.practicum.core.common.dto.event.EventState;
 import ru.practicum.core.request.model.Request;
-import ru.practicum.core.request.model.RequestStatus;
+import ru.practicum.core.common.dto.request.RequestStatus;
 import ru.practicum.core.request.repository.RequestRepository;
+import ru.practicum.ewm.stats.proto.user.ActionTypeProto;
+import ru.practicum.stats.client.CollectorClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,6 +39,8 @@ public class RequestServiceImpl implements RequestService {
 
     private final UserClient userClient;
     private final EventClient eventClient;
+
+    private final CollectorClient collectorClient;
 
     @Override
     @Transactional(readOnly = true)
@@ -92,6 +96,9 @@ public class RequestServiceImpl implements RequestService {
 
         Request savedRequest = requestRepository.save(request);
         log.info("Request created: {}", savedRequest);
+
+        collectorClient.collectUserAction(userId, eventId, ActionTypeProto.ACTION_REGISTER);
+        log.debug("User action sent: user ({}) registered to event ({})", userId, eventId);
 
         return RequestMapper.toDto(savedRequest);
     }
@@ -221,15 +228,5 @@ public class RequestServiceImpl implements RequestService {
         log.debug("Confirmed requests map: {}", confirmedRequests);
 
         return confirmedRequests;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<ParticipationRequestDto> getByEventAndRequester(Long eventId, Long requesterId) {
-        log.debug("tst");
-
-        return requestRepository.findByEventAndRequester(eventId, requesterId).stream()
-                .map(RequestMapper::toDto)
-                .toList();
     }
 }

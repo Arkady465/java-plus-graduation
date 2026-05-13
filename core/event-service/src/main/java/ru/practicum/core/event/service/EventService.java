@@ -29,7 +29,11 @@ public interface EventService {
 
     List<EventShortDto> publicSearchEvents(EventPublicFilter eventPublicFilter, PageRequestDto pageRequestDto);
 
-    EventFullDto getPublishedEvent(Long eventId);
+    EventFullDto getPublishedEvent(Long userId, Long eventId);
 
     EventFullDto getEvent(Long eventId);
+
+    List<EventShortDto> getRecommendations(Long userId);
+
+    void putLike(Long userId, Long eventId);
 }

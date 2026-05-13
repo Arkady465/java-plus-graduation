@@ -1,0 +1,22 @@
+server:
+  port: 0
+
+logging:
+  level:
+    root: INFO
+    ru.practicum.stats.aggregator: DEBUG
+
+kafka:
+  server: 'localhost:9092'
+  topics:
+    users: 'stats.user-actions.v1'
+    events: 'stats.events-similarity.v1'
+  consumer:
+    client-id: 'aggregator'
+    group-id: 'aggregator.group'
+    poll-duration-ms: 5000
+
+action-weights:
+  view: 0.4
+  register: 0.8
+  like: 1

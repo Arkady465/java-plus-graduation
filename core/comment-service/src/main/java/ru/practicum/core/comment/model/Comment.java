@@ -31,11 +31,4 @@ public class Comment {
 
     @Column(name = "edited_on")
     private LocalDateTime editedOn = null;
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdOn == null) {
-            createdOn = LocalDateTime.now();
-        }
-    }
 }

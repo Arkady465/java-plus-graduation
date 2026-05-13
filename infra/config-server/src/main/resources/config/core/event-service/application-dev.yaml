@@ -20,11 +20,20 @@ spring:
       circuitbreaker:
         enabled: true
 
-# Stats-server custom properties
-stats-server:
-  id: 'stats-server'
-  retryBackOffPeriod: 10000
-  retryMaxAttempts: 5
+grpc:
+  client:
+    analyzer:
+      address: 'discovery:///analyzer'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+      lazy: true
+    collector:
+      address: 'discovery:///collector'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+      lazy: true
 
 feign:
   client:
@@ -57,3 +66,4 @@ logging:
       transaction:
         interceptor: DEBUG
     ru.practicum.core.event: DEBUG
+    ru.practicum.stats.client: DEBUG
